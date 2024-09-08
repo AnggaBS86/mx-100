@@ -1,0 +1,28 @@
+mx-100 git:(main) ✗ php artisan test --group=ControllerTest
+
+   PASS  Tests\Feature\AuthorControllerTest
+  ✓ list of authors                                                                                                                               0.35s  
+  ✓ list of authors return empty                                                                                                                  0.01s  
+  ✓ create author return success                                                                                                                  0.02s  
+  ✓ create author return invalid name                                                                                                             0.01s  
+  ✓ create author return invalid bio                                                                                                              0.01s  
+  ✓ update author return success                                                                                                                  0.01s  
+  ✓ update author return validation error                                                                                                         0.01s  
+  ✓ delete author return success                                                                                                                  0.01s  
+  ✓ delete author return failed                                                                                                                   0.01s  
+  ✓ get all book by author return success                                                                                                         0.01s  
+  ✓ get all book by author return empty                                                                                                           0.01s  
+
+   PASS  Tests\Feature\BookControllerTest
+  ✓ list of books                                                                                                                                 0.02s  
+  ✓ list of books return empty                                                                                                                    0.01s  
+  ✓ create book return success                                                                                                                    0.01s  
+  ✓ create book return invalid title                                                                                                              0.01s  
+  ✓ create book return invalid description                                                                                                        0.01s  
+  ✓ update book return success                                                                                                                    0.01s  
+  ✓ update book return validation error                                                                                                           0.01s  
+  ✓ delete book return success                                                                                                                    0.01s  
+  ✓ delete book return failed                                                                                                                     0.01s  
+
+  Tests:    20 passed (59 assertions)
+  Duration: 0.57s
