@@ -1,8 +1,6 @@
-**MX-100 Job Portal API**
+# MX-100 Library Management System REST API
 
-MX100 is job portal which connects company and expert freelancer/part-timer. It always keeps
-track of freelancer performance and the more jobs the freelancer completes, the more
-benefits they gain.
+MX100 library management system.
 
 This REST API stack use PHP 8.2.7 and laravel 10 and MySQL 8.0.32
 
@@ -11,7 +9,9 @@ This REST API stack use PHP 8.2.7 and laravel 10 and MySQL 8.0.32
 - The Repository pattern is used for abstracting how data is persisted or retrieved from a database. The idea behind the Repository pattern is to decouple the data access layer from the business access layer of the application so that the operations (such as adding, updating, deleting, and selecting items from the collection) is done through straightforward methods without dealing with database concerns such as connections, commands, and so forth.
 <hr/>
 
-**Bonus implementation :**
+# Performance Tuning :
+
+**1. Using Native built up function from C languange**
 
 I have develop PHP extension library, that used for email validation. The function name is : 
 `bool validate_email(string $email)`
@@ -28,9 +28,42 @@ print $isEmailValid;
 It is used C language for build this extension, you can see the detail project at https://github.com/AnggaBS86/validate-email-php-ext 
 For this project, please build the extenstion first before you using this function by following the instruction from github above.
 
+
+**2. Avoid N+1 query problem by using lazy loading**
+
+I have implemented `Lazy Loading` to prevent the N+1 query problem
+Basically, just using `with` function
+example : 
+```
+  $result = Author::where('id', $authorId)->with('books')->get();
+```
+
+**3. Implement Cache**
+
+```
+    public function getAllBookByAuthor(int $authorId) 
+    {
+        $cacheExists = Cache::has('book_author_'.$authorId);
+        if ($cacheExists) {
+
+            $bookAuthor = Cache::get('book_author_'.$authorId);
+            return $bookAuthor;
+        }
+
+        $result = Author::where('id', $authorId)->with('books')->get();
+        return $result;
+    }
+```
+
+
+**4. Implement Elasticsearch**
+
+For the millions data we better use Elasticsearch for searching purpose. 
+I've created the query indexer by using Golang and could be found at https://github.com/AnggaBS86/golang_elastic/ 
+
 <hr/>
 
-**How to installation** 
+## How to installation
 
 Since this tech stack using PHP and MySQL, i assumed you have been installed those 
 Step by step installation : 
@@ -50,188 +83,457 @@ Step by step installation :
 
 <hr/>
 
-**REST API Documentation**
+# REST API Documentation
 
-**1. Registration Endpoint**
-- Endpoint : `{{URL}}/api/registration`
-- Method : POST
-- Parameter : 
-```
-{
-		"name" : "name",
-		"email" : "name@email.com",
-		"user_type_id" : "2",
-		"password" : "12345678"
-}
-```
+## Author
+
+**1. Get Author Endpoint**
+- Endpoint : `{{URL}}/api/v1/authors`
+- Method : GET
+- Parameter : -
 - Response :
 ```
 {
-    "data": {
-        "name": "proposal-name",
-        "email": "name@email.com",
-        "user_type_id": "2",
-        "updated_at": "2023-07-06T06:26:09.000000Z",
-        "created_at": "2023-07-06T06:26:09.000000Z",
-        "id": 4
-    },
-    "access_token": "5|kA4yiO2TmoLcir2yl5FQRCduSMjadxc5Newl6Acq",
-    "token_type": "Bearer"
+    "current_page": 1,
+    "data": [
+        {
+            "id": 2,
+            "name": "Name Author 2 updated #3",
+            "bio": "Biodata updated auhtor 2",
+            "birth_date": "2000-11-11",
+            "created_at": "2024-03-11T00:00:00.000000Z",
+            "updated_at": "2024-09-07T06:55:39.000000Z"
+        },
+        {
+            "id": 6,
+            "name": "Name example 1",
+            "bio": "Biodata",
+            "birth_date": "2000-10-10",
+            "created_at": "2024-09-06T10:16:02.000000Z",
+            "updated_at": "2024-09-06T10:16:02.000000Z"
+        },
+        {
+            "id": 14,
+            "name": "Name 123",
+            "bio": "Bio",
+            "birth_date": "1975-01-31",
+            "created_at": "2024-09-06T14:08:06.000000Z",
+            "updated_at": "2024-09-06T14:08:06.000000Z"
+        }
+    ],
+    "first_page_url": "http://127.0.0.1:8000/api/v1/authors?page=1",
+    "from": 1,
+    "last_page": 1,
+    "last_page_url": "http://127.0.0.1:8000/api/v1/authors?page=1",
+    "links": [
+        {
+            "url": null,
+            "label": "&laquo; Previous",
+            "active": false
+        },
+        {
+            "url": "http://127.0.0.1:8000/api/v1/authors?page=1",
+            "label": "1",
+            "active": true
+        },
+        {
+            "url": null,
+            "label": "Next &raquo;",
+            "active": false
+        }
+    ],
+    "next_page_url": null,
+    "path": "http://127.0.0.1:8000/api/v1/authors",
+    "per_page": 15,
+    "prev_page_url": null,
+    "to": 3,
+    "total": 3
 }
 ```
 
-**2. Login Endpoint**
-- Endpoint : `{{URL}}/api/login`
+**2. Get Author By ID Endpoint**
+- Endpoint : `{{URL}}/api/v1/authors/{id}`
 - Method : POST
-- Parameter : 
-```
-{
-    "email" : "email@email.com",
-    "password" : "12345678"
-}
-```
-- Response : 
-```
-{
-    "message": "Hi name12356789, welcome to home",
-    "access_token": "2|QR6SydbrRi8H9yyr5pnVXoWLJGVfUIgRQVRAm9K3",
-    "token_type": "Bearer"
-}
-```
-
-**3. List of Proposal (By Employer)**
-- Endpoint : `{{URL}}/api/jobs/proposal`
-- Method : GET
-- Parameter : -
-- Header : 
-```
-Authentication Bearer {{access_token}}
-```
+- Parameter :
 - Response : 
 ```
 [
-    {
-        "id": 1,
-        "user_id": 2,
-        "job_id": 1,
-        "name": "Proposal11",
-        "note": "Note 1",
-        "created_at": "2023-07-05T18:17:14.000000Z",
-        "updated_at": "2023-07-05T18:17:14.000000Z"
-    },
     {
         "id": 2,
-        "user_id": 1,
-        "job_id": 1,
-        "name": "Proposal 123",
-        "note": "Notes",
-        "created_at": "2023-07-05T20:25:46.000000Z",
-        "updated_at": "2023-07-05T20:25:46.000000Z"
-    }
-]
-```
-
-**4. Create New Job Posting**
-- Endpoint : `{{URL}}/api/jobs/create`
-- Method : POST
-- Parameter : -
-- Header : 
-```
-Authentication Bearer {{access_token}}
-```
-- Parameter :
-```
-{
-    "name" : "Job 123",
-    "description" : "description ...",
-    "status" : "draft" /*or "published" */
-}
-```
-
-- Response :
-```
-{
-    "user_id": 1,
-    "name": "Job 123",
-    "description": "description ...",
-    "status": "draft",
-    "updated_at": "2023-07-05T19:49:27.000000Z",
-    "created_at": "2023-07-05T19:49:27.000000Z",
-    "id": 3
-}
-```
-
-**5. List of Published Jobs**
-- Endpoint : `{{URL}}/api/proposal/published`
-- Method : GET
-- Parameter : -
-- Header : 
-```
-Authentication Bearer {{access_token}}
-```
-- Parameter : -
-- Response : 
-```
-[
-    {
-        "id": 1,
-        "user_id": 1,
-        "name": "lowongan PHP programmer",
-        "description": "Lowongan Pekerjaan 1",
-        "status": "published",
-        "created_at": "2023-07-05T18:17:13.000000Z",
-        "updated_at": "2023-07-05T18:17:13.000000Z",
-        "proposal": [
+        "name": "Name Author 2 updated #3",
+        "bio": "Biodata updated auhtor 2",
+        "birth_date": "2000-11-11",
+        "created_at": "2024-03-11T00:00:00.000000Z",
+        "updated_at": "2024-09-07T06:55:39.000000Z",
+        "books": [
             {
-                "id": 1,
-                "user_id": 2,
-                "job_id": 1,
-                "name": "Proposal11",
-                "note": "Note 1",
-                "created_at": "2023-07-05T18:17:14.000000Z",
-                "updated_at": "2023-07-05T18:17:14.000000Z"
+                "id": 2,
+                "author_id": 2,
+                "title": "Book Harry Potter 2",
+                "description": "This is book of Harry Potter 2",
+                "publish_date": "2000-10-10",
+                "created_at": "2024-03-11T00:00:00.000000Z",
+                "updated_at": "2024-09-06T12:51:07.000000Z"
+            },
+            {
+                "id": 3,
+                "author_id": 2,
+                "title": "Book Three",
+                "description": "desc",
+                "publish_date": "2021-11-11",
+                "created_at": "2024-03-11T00:00:00.000000Z",
+                "updated_at": "2024-03-11T00:00:00.000000Z"
+            },
+            {
+                "id": 4,
+                "author_id": 2,
+                "title": "Book OK",
+                "description": "desc",
+                "publish_date": "2021-11-11",
+                "created_at": "2024-03-11T00:00:00.000000Z",
+                "updated_at": "2024-03-11T00:00:00.000000Z"
             }
         ]
     }
 ]
 ```
-**6. Store new proposal**
-- Endpoint : `{{URL}}/api/proposal/store`
-- Method : POST
+
+**3. Get Author with Books**
+- Endpoint : `{{URL}}/api/v2/authors/{authorId}/books`
+- Method : GET
 - Parameter : -
-- Header : 
+- Response : 
 ```
-Authentication Bearer {{access_token}}
+[
+    {
+        "id": 2,
+        "name": "Name Author 2 updated #3",
+        "bio": "Biodata updated auhtor 2",
+        "birth_date": "2000-11-11",
+        "created_at": "2024-03-11T00:00:00.000000Z",
+        "updated_at": "2024-09-07T06:55:39.000000Z",
+        "books": [
+            {
+                "id": 2,
+                "author_id": 2,
+                "title": "Book Harry Potter 2",
+                "description": "This is book of Harry Potter 2",
+                "publish_date": "2000-10-10",
+                "created_at": "2024-03-11T00:00:00.000000Z",
+                "updated_at": "2024-09-06T12:51:07.000000Z"
+            },
+            {
+                "id": 3,
+                "author_id": 2,
+                "title": "Book Three",
+                "description": "desc",
+                "publish_date": "2021-11-11",
+                "created_at": "2024-03-11T00:00:00.000000Z",
+                "updated_at": "2024-03-11T00:00:00.000000Z"
+            },
+            {
+                "id": 4,
+                "author_id": 2,
+                "title": "Book OK",
+                "description": "desc",
+                "publish_date": "2021-11-11",
+                "created_at": "2024-03-11T00:00:00.000000Z",
+                "updated_at": "2024-03-11T00:00:00.000000Z"
+            }
+        ]
+    }
+]
 ```
-- Parameter : 
+
+**4. Get Author with Book (from Elasticsearch)**
+- Endpoint : `{{URL}}/api/v1/authors/{authorId}/books/elasticsearch`
+- Method : GET
+- Parameter : -
+- Response :
 ```
 {
-    "name" : "Proposal 1234",
-    "job_id" : 2,
-    "note" : "Notes"
+    "took": 5,
+    "timed_out": false,
+    "_shards": {
+        "total": 1,
+        "successful": 1,
+        "skipped": 0,
+        "failed": 0
+    },
+    "hits": {
+        "total": {
+            "value": 1,
+            "relation": "eq"
+        },
+        "max_score": 1.0,
+        "hits": [
+            {
+                "_index": "mx_100_elastic",
+                "_id": "2",
+                "_score": 1.0,
+                "_source": {
+                    "id": 2,
+                    "name": "Name Author 2 updated #3",
+                    "bio": "Biodata updated auhtor 2",
+                    "birth_date": "2000-11-11",
+                    "books":  [
+		            {
+		                "id": 2,
+		                "author_id": 2,
+		                "title": "Book Harry Potter 2",
+		                "description": "This is book of Harry Potter 2",
+		                "publish_date": "2000-10-10",
+		                "created_at": "2024-03-11T00:00:00.000000Z",
+		                "updated_at": "2024-09-06T12:51:07.000000Z"
+		            },
+		            {
+		                "id": 3,
+		                "author_id": 2,
+		                "title": "Book Three",
+		                "description": "desc",
+		                "publish_date": "2021-11-11",
+		                "created_at": "2024-03-11T00:00:00.000000Z",
+		                "updated_at": "2024-03-11T00:00:00.000000Z"
+		            },
+		            {
+		                "id": 4,
+		                "author_id": 2,
+		                "title": "Book OK",
+		                "description": "desc",
+		                "publish_date": "2021-11-11",
+		                "created_at": "2024-03-11T00:00:00.000000Z",
+		                "updated_at": "2024-03-11T00:00:00.000000Z"
+		            }
+		        ]
+                }
+            }
+        ]
+    }
 }
 ```
+
+**5. Create New Author**
+- Endpoint : `{{URL}}/api/v1/authors`
+- Method : POST
+- Parameter :
+  ```
+  {
+    "name" : "Name example New",
+    "bio" : "Biodata",
+    "birth_date" : "2000-10-10"
+  }
+  ```
+- Response : 
+```
+{
+    "name": "Name example New",
+    "bio": "Biodata",
+    "birth_date": "2000-10-10",
+    "updated_at": "2024-09-08T07:08:09.000000Z",
+    "created_at": "2024-09-08T07:08:09.000000Z",
+    "id": 15
+}
+```
+- Response validation error :
+  ```
+  {
+    "name": [
+        "The name field is required."
+    ]
+  }
+  ```
+  
+**6. Update Author**
+- Endpoint : `{{URL}}/api/v1/authors`
+- Method : PUT
+- Parameter :
+  ```
+  {
+    "name" : "Name Author 2 updated #3",
+    "bio" : "Biodata updated auhtor 2",
+    "birth_date" : "2000-10-10"
+  }
+  ``` 
 - Response Success :
 ```
 {
-    "user_id": 1,
-    "job_id": 2,
-    "name": "Proposal 1234",
-    "note": "Notes",
-    "updated_at": "2023-07-06T07:00:49.000000Z",
-    "created_at": "2023-07-06T07:00:49.000000Z",
-    "id": 3
+    "id": 2,
+    "name": "Name Author 2 updated #3",
+    "bio": "Biodata updated auhtor 2",
+    "birth_date": "2000-11-11",
+    "created_at": "2024-03-11T00:00:00.000000Z",
+    "updated_at": "2024-09-07T06:55:39.000000Z"
 }
 ```
 
-Response failed (proposal on refers job already exists) :
+Response failed (validation error) :
 ```
-"Proposal already exists!"
+{
+    "name": [
+        "The name field is required."
+    ]
+}
 ```
+
+**7. Delete Author**
+- Endpoint : `{{URL}}/api/v1/authors/{id}`
+- Method : DELETE
+- Response Success :
+```
+true
+```
+
+## Book
+
+**1. Get Book Endpoint**
+- Endpoint : `{{URL}}/api/v1/books`
+- Method : GET
+- Parameter : -
+- Response :
+```
+{
+    "current_page": 1,
+    "data": [
+        {
+            "id": 2,
+            "author_id": 2,
+            "title": "Book Harry Potter 2",
+            "description": "This is book of Harry Potter 2",
+            "publish_date": "2000-10-10",
+            "created_at": "2024-03-11T00:00:00.000000Z",
+            "updated_at": "2024-09-06T12:51:07.000000Z"
+        },
+        {
+            "id": 3,
+            "author_id": 2,
+            "title": "Book Three",
+            "description": "desc",
+            "publish_date": "2021-11-11",
+            "created_at": "2024-03-11T00:00:00.000000Z",
+            "updated_at": "2024-03-11T00:00:00.000000Z"
+        },
+        {
+            "id": 4,
+            "author_id": 2,
+            "title": "Book OK",
+            "description": "desc",
+            "publish_date": "2021-11-11",
+            "created_at": "2024-03-11T00:00:00.000000Z",
+            "updated_at": "2024-03-11T00:00:00.000000Z"
+        }
+    ],
+    "first_page_url": "http://127.0.0.1:8000/api/v1/books?page=1",
+    "from": 1,
+    "last_page": 1,
+    "last_page_url": "http://127.0.0.1:8000/api/v1/books?page=1",
+    "links": [
+        {
+            "url": null,
+            "label": "&laquo; Previous",
+            "active": false
+        },
+        {
+            "url": "http://127.0.0.1:8000/api/v1/books?page=1",
+            "label": "1",
+            "active": true
+        },
+        {
+            "url": null,
+            "label": "Next &raquo;",
+            "active": false
+        }
+    ],
+    "next_page_url": null,
+    "path": "http://127.0.0.1:8000/api/v1/books",
+    "per_page": 15,
+    "prev_page_url": null,
+    "to": 3,
+    "total": 3
+}
+```
+
+**2. Get Book By ID**
+- Endpoint : `{{URL}}/api/v1/books/{id}`
+- Method : GET
+- Parameter : -
+- Response :
+```
+[
+    {
+        "id": 2,
+        "author_id": 2,
+        "title": "Book Harry Potter 2",
+        "description": "This is book of Harry Potter 2",
+        "publish_date": "2000-10-10",
+        "created_at": "2024-03-11T00:00:00.000000Z",
+        "updated_at": "2024-09-06T12:51:07.000000Z"
+    }
+]
+```
+
+**3. Create New Book**
+- Endpoint : `{{URL}}/api/v1/books`
+- Method : POST
+- Parameter :
+  ```
+  {
+    "title" : "Book Harry Potter",
+    "description" : "This is book of Harry Potter",
+    "publish_date" : "2000-10-10",
+    "author_id" : 2
+  }
+  ```
+- Response :
+```
+{
+    "title": "Book Harry Potter",
+    "description": "This is book of Harry Potter",
+    "publish_date": "2000-10-10",
+    "author_id": 2,
+    "updated_at": "2024-09-08T07:37:14.000000Z",
+    "created_at": "2024-09-08T07:37:14.000000Z",
+    "id": 6
+}
+```
+
+**4. Update Book By ID**
+- Endpoint : `{{URL}}/api/v1/books/{id}`
+- Method : PUT
+- Parameter :
+  ```
+  {
+    "title" : "Book Harry Potter 2",
+    "description" : "This is book of Harry Potter 2",
+    "publish_date" : "2000-10-10",
+    "author_id" : 6
+  }
+  ```
+- Response :
+```
+{
+    "id": 6,
+    "author_id": 6,
+    "title": "Book Harry Potter 2",
+    "description": "This is book of Harry Potter 2",
+    "publish_date": "2000-10-10",
+    "created_at": "2024-09-08T07:37:14.000000Z",
+    "updated_at": "2024-09-08T07:38:00.000000Z"
+}
+```
+
+**5. Delete Book By ID**
+- Endpoint : `{{URL}}/api/v1/books/{id}`
+- Method : DELETE
+- Parameter : -
+- Response :
+```
+true
+```
+
 
 <hr/>
 
-**How to run unit testing**
+# How to run unit testing
 
 - Run the command : 
 ```
