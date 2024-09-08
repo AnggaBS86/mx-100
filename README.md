@@ -583,46 +583,39 @@ true
 
 - Run the command : 
 ```
-./vendor/bin/phpunit ./tests --testdox
+./vendor/bin/phpunit ./tests --testdox --group=ControllerTest
 ```
 this is the example of unit test result :
 
 ```
-mx-100 sudo ./vendor/bin/phpunit ./tests --testdox
-[sudo] password for user: 
-PHPUnit 10.2.3 by Sebastian Bergmann and contributors.
+➜  mx-100 git:(main) ✗ php artisan test --group=ControllerTest
 
-Runtime:       PHP 8.2.7
-Configuration: /var/www/html/mx-100/phpunit.xml
+   PASS  Tests\Feature\AuthorControllerTest
+  ✓ list of authors                                                                                                                               0.35s  
+  ✓ list of authors return empty                                                                                                                  0.01s  
+  ✓ create author return success                                                                                                                  0.02s  
+  ✓ create author return invalid name                                                                                                             0.01s  
+  ✓ create author return invalid bio                                                                                                              0.01s  
+  ✓ update author return success                                                                                                                  0.01s  
+  ✓ update author return validation error                                                                                                         0.01s  
+  ✓ delete author return success                                                                                                                  0.01s  
+  ✓ delete author return failed                                                                                                                   0.01s  
+  ✓ get all book by author return success                                                                                                         0.01s  
+  ✓ get all book by author return empty                                                                                                           0.01s  
 
-.............                                                     13 / 13 (100%)
+   PASS  Tests\Feature\BookControllerTest
+  ✓ list of books                                                                                                                                 0.02s  
+  ✓ list of books return empty                                                                                                                    0.01s  
+  ✓ create book return success                                                                                                                    0.01s  
+  ✓ create book return invalid title                                                                                                              0.01s  
+  ✓ create book return invalid description                                                                                                        0.01s  
+  ✓ update book return success                                                                                                                    0.01s  
+  ✓ update book return validation error                                                                                                           0.01s  
+  ✓ delete book return success                                                                                                                    0.01s  
+  ✓ delete book return failed                                                                                                                     0.01s  
 
-Time: 00:12.369, Memory: 34.00 MB
-
-Auth Controller (Tests\Feature\AuthController)
- ✔ Register new user succeed
- ✔ Register new user with email already exists
- ✔ Login should succeed
- ✔ Login should failed
-
-Example (Tests\Feature\Example)
- ✔ The application returns a successful response
-
-Example (Tests\Unit\Example)
- ✔ That true is true
-
-Job Controller (Tests\Feature\JobController)
- ✔ List of proposal
- ✔ List of proposal with invalid user
- ✔ Create job
- ✔ Create job failed
-
-Proposal Controller (Tests\Feature\ProposalController)
- ✔ Get published jobs
- ✔ Store proposal
- ✔ Store proposal failed
-
-OK (13 tests, 22 assertions)
+  Tests:    20 passed (59 assertions)
+  Duration: 0.57s
 ```
 
 <hr/>
