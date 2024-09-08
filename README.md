@@ -61,6 +61,52 @@ example :
 For the millions data we better use Elasticsearch for searching purpose. 
 I've created the query indexer by using Golang and could be found at https://github.com/AnggaBS86/golang_elastic/ 
 
+```
+/**
+     * This is one of the example of performance tunning for better searching technique
+     * this function call from Elasticsearch query search
+     * 
+     * Make sure the elasticsearch is installed and the data is ingested
+     * 
+     * Get all books data by author
+     * 
+     * @param int $authorId
+     * 
+     * @return mixed
+     * 
+     */
+    public function getAllBookByAuthorElasticsearch(int $authorId)
+    {
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => env('ELASTICSEARCH_URL'),
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS =>'{
+                "query": {
+                  "term": {
+                    "_id": "'.$authorId.'"
+                  }
+                }
+              }',
+            CURLOPT_HTTPHEADER => array(
+                'Authorization: ApiKey '.env('ELASTICSEARCH_API_KEY'),
+                'Content-Type: application/json'
+            ),
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+        echo ($response);
+    }
+```
+
 <hr/>
 
 ## How to installation
